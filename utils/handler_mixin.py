@@ -12,23 +12,18 @@ class HandlerMixin(object):
     def find_app(self, app_id, on_app_found):
         """查apps表"""
         if not app_id:
-            # TODO 处理逻辑为如果没有app_id怎么返回
-            pass
+            self.on_login_callback_error(app_or_platform=None)
         sql_str = "select * from apps where id={}".format(app_id)
 
         def callback(result):
             if not result:
-                # TODO 查询结果为空怎么处理
-                pass
+                self.on_login_callback_error(app_result=None, app_id=app_id)
             app_params = result[0]
             on_app_found(app_params)
 
         self._mysql.query(sql_str, callback)
 
     def find_handler(self, app_params, platform_id, handler_name, on_find_handler):
-        if not app_params:
-            # TODO 查询结果为空怎么处理
-            pass
         # 老sdk业务逻辑保留
         if  int(app_params['id']) == 300 and platform_id == 0:
             platform_id = 72
@@ -43,8 +38,7 @@ class HandlerMixin(object):
         def callback(result):
             handler = None
             if not result:
-                # TODO 查询结果为空怎么处理
-                pass
+                self.on_login_callback_error(platform_result=None, platform_id=platform_id)
             # 实名认证
             elif handler_name == 'check_real_name':
                 if result[0]['check_real_name'] == '0':
@@ -78,8 +72,7 @@ class HandlerMixin(object):
         """
         platform_id = int(platform) if platform.isdigit() else platform_defines.name_to_id(platform)
         if not platform_id:
-            # TODO 处理逻辑为如果没有渠道id怎么返回
-            pass
+            self.on_login_callback_error(app_or_platform=None)
 
         def on_app_found(app_params):
             self._app = app_params
@@ -118,3 +111,17 @@ class HandlerMixin(object):
             self.set_status(constant.HTTP_401, reason='sign not match')
             if not self._finished:
                 self.finish()
+
+
+    def on_login_callback_error(self, *args, **kwargs):
+        """统一处理查询app,platform错误"""
+        print(args, kwargs)
+        if not kwargs.get('app_or_platform', True):
+            data = {'status': 403, 'data': {'msg': "app_or_platform not exist"}}
+            self.write(data)
+        elif not kwargs.get('app_result', True) and kwargs['app_id']:
+            data = {'status': 403, 'data': {'msg': "app_id:{},find error".format(kwargs['app_id'])}}
+            self.write(data)
+        elif not kwargs.get('platform_result', True) and kwargs['platform_id']:
+            data = {'status': 403, 'data': {'msg': "platform_id:{},find error".format(kwargs['platform_id'])}}
+            self.write(data)

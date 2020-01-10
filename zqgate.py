@@ -41,6 +41,13 @@ class Login(Web, SignMixin):
         return params['sign'] == self.calc_sign(params) if params['sign'] else False
 
 
+    def on_login_callback(self, succeed, msg):
+        """登录请求回调"""
+        data = {'status': 200, 'data': succeed} if succeed else {'status': 403, 'data': {'msg': msg}}
+        self.write(data)
+        self.finish()
+
+
 def start():
     try:
         mysql = Mysql(**settings.database_configs[options.mode])  # 初始化数据库链接

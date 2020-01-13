@@ -3,7 +3,7 @@ uni_sdk 启动文件
 """
 from tornado.options import define, options
 from tornado.web import Application, RequestHandler
-from utils.msyql import Mysql
+from utils.async_mysql import AsyncMysql
 from utils.handler_mixin import HandlerMixin
 from common.sign_mixin import SignMixin
 
@@ -50,7 +50,7 @@ class Login(Web, SignMixin):
 
 def start():
     try:
-        mysql = Mysql(**settings.database_configs[options.mode])  # 初始化数据库链接
+        mysql = AsyncMysql(settings.database_configs[options.mode])  # 初始化数据库链接
         platform_defines.import_platforms()  # 导入渠道配置
         application = Application([
             (r"/(?P<app_id>[^/]+)/(?P<platform>[^/]+)/(?P<action>login_request)", Login, dict(mysql=mysql)), # 登录模块
@@ -88,3 +88,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # import time
+    # from settings import database_configs
+    # test = AsyncMysql(database_configs['local_test'])
+    # sql_str = "select * from apps"
+    # def callback():
+    #     for i in range(10):
+    #         time.sleep(3)
+    #         print("123123")
+    #
+    # for i in range(5):
+    #     test.query_hash(sql_str, callback=callback)

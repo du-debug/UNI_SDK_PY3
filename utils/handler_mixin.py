@@ -21,7 +21,7 @@ class HandlerMixin(object):
             app_params = result[0]
             on_app_found(app_params)
 
-        self._mysql.query(sql_str, callback)
+        self._mysql.query(sql_str, callback=callback)
 
     def find_handler(self, app_params, platform_id, handler_name, on_find_handler):
         # 老sdk业务逻辑保留
@@ -62,7 +62,7 @@ class HandlerMixin(object):
                     self.platform_info = result[0]
             on_find_handler(handler)
 
-        self._mysql.query(sql_str, callback)
+        self._mysql.query(sql_str, callback=callback)
 
     def handle_request_with_process(self, app_id, platform, handler_name):
         """
@@ -115,9 +115,9 @@ class HandlerMixin(object):
 
     def on_login_callback_error(self, *args, **kwargs):
         """统一处理查询app,platform错误"""
-        print(args, kwargs)
         if not kwargs.get('app_or_platform', True):
             data = {'status': 403, 'data': {'msg': "app_or_platform not exist"}}
+            print('123')
             self.write(data)
         elif not kwargs.get('app_result', True) and kwargs['app_id']:
             data = {'status': 403, 'data': {'msg': "app_id:{},find error".format(kwargs['app_id'])}}

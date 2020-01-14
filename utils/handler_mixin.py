@@ -15,13 +15,13 @@ class HandlerMixin(object):
             self.on_login_callback_error(app_or_platform=None)
         sql_str = "select * from apps where id={}".format(app_id)
 
-        def callback(result):
-            if not result:
+        def callback(result, ex):
+            if not result or ex:
                 self.on_login_callback_error(app_result=None, app_id=app_id)
             app_params = result[0]
             on_app_found(app_params)
 
-        self._mysql.query(sql_str, callback=callback)
+        self._mysql.query_hash(sql_str, callback=callback)
 
     def find_handler(self, app_params, platform_id, handler_name, on_find_handler):
         # 老sdk业务逻辑保留
@@ -35,9 +35,9 @@ class HandlerMixin(object):
             where += " AND norecharge=0 "
         sql_str = "SELECT * FROM distribution_infos WHERE %s" % where
 
-        def callback(result):
+        def callback(result, ex):
             handler = None
-            if not result:
+            if not result or ex:
                 self.on_login_callback_error(platform_result=None, platform_id=platform_id)
             # 实名认证
             elif handler_name == 'check_real_name':
@@ -62,7 +62,7 @@ class HandlerMixin(object):
                     self.platform_info = result[0]
             on_find_handler(handler)
 
-        self._mysql.query(sql_str, callback=callback)
+        self._mysql.query_hash(sql_str, callback=callback)
 
     def handle_request_with_process(self, app_id, platform, handler_name):
         """
@@ -117,7 +117,6 @@ class HandlerMixin(object):
         """统一处理查询app,platform错误"""
         if not kwargs.get('app_or_platform', True):
             data = {'status': 403, 'data': {'msg': "app_or_platform not exist"}}
-            print('123')
             self.write(data)
         elif not kwargs.get('app_result', True) and kwargs['app_id']:
             data = {'status': 403, 'data': {'msg': "app_id:{},find error".format(kwargs['app_id'])}}
@@ -125,3 +124,4 @@ class HandlerMixin(object):
         elif not kwargs.get('platform_result', True) and kwargs['platform_id']:
             data = {'status': 403, 'data': {'msg': "platform_id:{},find error".format(kwargs['platform_id'])}}
             self.write(data)
+            self.finish()

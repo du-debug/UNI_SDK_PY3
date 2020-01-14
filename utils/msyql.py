@@ -7,6 +7,7 @@ import time
 import datetime
 import pymysql
 from DBUtils.PooledDB import PooledDB
+from utils.async_mixin import check_mysql_coonect
 
 # 测算时间装饰器
 def run_time(f):
@@ -16,6 +17,7 @@ def run_time(f):
         end_time = time.time()
         print("运行时间:{}".format(end_time-start_time))
     return in_func
+
 
 class DbutilsMySql(object):
 
@@ -33,13 +35,24 @@ class DbutilsMySql(object):
         )  # 初始化
         super(DbutilsMySql, self).__init__()
 
-    def query(self, sql_str):
-        print(sql_str)
-        conn = self.db_pool.connection()
-        cursor = conn.cursor()
-        cursor.execute(sql_str)
-        result = cursor.fetchone()
+    def connect(self):
+        self.coon = self.db_pool.connection()
+        self.cursor = self.coon.cursor()
+
+    @check_mysql_coonect
+    def query_hash(self, sql_str):
+        try:
+            self.cursor.execute(sql_str)
+            print(sql_str)
+            result = self.cursor.fetchall()
+        except Exception as e:
+            pass
         return result
+
+    def close(self):
+        """释放连接池中的coon和cursor"""
+        self.cursor.close()
+        self.coon.close()
 
 
 class PymsqlTest(object):

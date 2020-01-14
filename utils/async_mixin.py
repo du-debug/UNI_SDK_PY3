@@ -4,6 +4,7 @@
 """
 # 参考文档地址：https://blog.csdn.net/daerzei/article/details/83865325
 import time
+import sys
 import pymysql
 import threading
 from functools import partial
@@ -74,7 +75,7 @@ class AsyncMixin(object):
         self._queue.put((func, callback))
 
     def stop(self):
-        """停止"""
+        """"""
         pass
 
 class WorkerThread(threading.Thread):
@@ -84,7 +85,7 @@ class WorkerThread(threading.Thread):
         self._pool = kwargs.get('pool', None)
 
     def run(self):
-        """执行队列里面热任务"""
+        """执行队列里面的任务"""
         queue = self._pool._queue
         queue_timeout = self._pool._queue_timeout
         while self._pool._running:
@@ -93,15 +94,23 @@ class WorkerThread(threading.Thread):
                 handler = self.get_handler()
                 print(func.func.__name__)
                 result = None
+                ex = None
                 if hasattr(handler, func.func.__name__):
-                    sql_str = func()
-                    result = getattr(handler, func.func.__name__)(*sql_str)
+                    try:
+                        sql_str = func()
+                        result = getattr(handler, func.func.__name__)(*sql_str)
+                    except Exception as e:
+                        ex = sys.exc_info() # 报错信息
                 else:
                     raise ValueError("%s not found" % func.func.__name__)
                 if callback:
-                    callback(result)
+                    # TODO 回调后续继承到tornado中
+                    callback(result, ex)
             except Empty:
                 pass
+        if hasattr(self, 'close'):
+            """释放连接池中coon和cursor"""
+            self.close()
 
 def async_thread(func):
     @wraps(func)
@@ -124,6 +133,18 @@ def async_class(klass):
             method = getattr(klass, name)
             setattr(klass, name, async_thread(method))  # 重置了查询sql的方法,并且添加到队列里面
     return klass
+
+# 检测数据库链
+def check_mysql_coonect(f):
+    def in_func(*args, **kwargs):
+        handler = args[0]
+        try:
+            handler.coon.ping()
+        except Exception:
+            handler.connect()
+        return f(*args, **kwargs)
+    return in_func
+
 
 if __name__ == "__main__":
 

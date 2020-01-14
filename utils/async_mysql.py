@@ -22,7 +22,8 @@ class MysqlThread(WorkerThread):
         return self._mysql
 
     def close(self):
-        pass
+        """释放连接池coon"""
+        self._mysql.close()
 
 @async_class
 class AsyncMysql(AsyncMixin):
@@ -31,7 +32,7 @@ class AsyncMysql(AsyncMixin):
     AsyncMixin:开启多个线程,调用start
     init方法里:数据库链接和线程初始化
     """
-    __async_methods__ = ['query_hash','select','insert','update','count','delete', 'query']
+    __async_methods__ = ['query_hash','select','insert','update','count','delete']
 
     def __init__(self, db_config, **kwargs):
         kwargs['thread_klass'] = MysqlThread  # 初始化数据库链接和多线程初始化
@@ -42,11 +43,7 @@ class AsyncMysql(AsyncMixin):
     def get_thread_pool(self):
         return self
 
-    def query_hash(self,sql):
-        return (sql,)
-
-    def query(self,sql, callback=None):
-        """测试"""
+    def query_hash(self,sql, **kwargs):
         return (sql,)
 
     def select(self,sql,how=1):

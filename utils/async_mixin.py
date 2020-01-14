@@ -75,8 +75,7 @@ class AsyncMixin(object):
         self._queue.put((func, callback))
 
     def stop(self):
-        """"""
-        pass
+        self._running = False
 
 class WorkerThread(threading.Thread):
 

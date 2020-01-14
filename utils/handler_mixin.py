@@ -13,7 +13,7 @@ class HandlerMixin(object):
         """查apps表"""
         if not app_id:
             self.on_login_callback_error(app_or_platform=None)
-        sql_str = "select * from apps where id={}".format(app_id)
+        sql_str = "SELECT * FROM APPS WHERE id={}".format(app_id)
 
         def callback(result, ex):
             if not result or ex:
@@ -118,9 +118,12 @@ class HandlerMixin(object):
         if not kwargs.get('app_or_platform', True):
             data = {'status': 403, 'data': {'msg': "app_or_platform not exist"}}
             self.write(data)
+            self.finish()
         elif not kwargs.get('app_result', True) and kwargs['app_id']:
             data = {'status': 403, 'data': {'msg': "app_id:{},find error".format(kwargs['app_id'])}}
             self.write(data)
+            self.finish()
         elif not kwargs.get('platform_result', True) and kwargs['platform_id']:
             data = {'status': 403, 'data': {'msg': "platform_id:{},find error".format(kwargs['platform_id'])}}
             self.write(data)
+            self.finish()

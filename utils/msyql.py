@@ -39,8 +39,9 @@ class DbutilsMySql(object):
         self.coon = self.db_pool.connection()
         self.cursor = self.coon.cursor()
 
-    @check_mysql_coonect
+    # @check_mysql_coonect
     def query_hash(self, sql_str):
+        self.connect()
         try:
             self.cursor.execute(sql_str)
             print(sql_str)
@@ -58,6 +59,10 @@ class DbutilsMySql(object):
 class PymsqlTest(object):
     def __init__(self, *args, **kwargs):
         pymysql.connect(**args[0])
+
+    def query_hash(self, sql_str):
+
+        return [{'a':1}]
 
 
 if __name__ == "__main__":

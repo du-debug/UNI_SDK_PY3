@@ -124,4 +124,3 @@ class HandlerMixin(object):
         elif not kwargs.get('platform_result', True) and kwargs['platform_id']:
             data = {'status': 403, 'data': {'msg': "platform_id:{},find error".format(kwargs['platform_id'])}}
             self.write(data)
-            self.finish()

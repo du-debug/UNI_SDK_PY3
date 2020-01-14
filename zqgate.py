@@ -6,6 +6,8 @@ from tornado.web import Application, RequestHandler
 from utils.async_mysql import AsyncMysql
 from utils.handler_mixin import HandlerMixin
 from common.sign_mixin import SignMixin
+from tornado.gen import coroutine
+from tornado import gen
 
 
 import settings
@@ -14,8 +16,11 @@ import tornado.options
 import tornado.ioloop
 
 
+
+
 class Web(RequestHandler, HandlerMixin):
     """处理请求公共"""
+
 
     def initialize(self, mysql):
         self._mysql = mysql
@@ -24,14 +29,15 @@ class Web(RequestHandler, HandlerMixin):
     def prepare(self):
         pass
 
-
+    @tornado.gen.coroutine
     def get(self, app_id, platform, action):
-
+        self._auto_finish = False  # TODO 不让自动提交finish
         self.handle_request_with_process(int(app_id), platform, action)
 
-
-    def post(self):
-        pass
+    @tornado.gen.coroutine
+    def post(self, app_id, platform, action):
+        self._auto_finish = False  # TODO 不让自动提交finish
+        self.handle_request_with_process(int(app_id), platform, action)
 
 
 class Login(Web, SignMixin):
@@ -40,13 +46,11 @@ class Login(Web, SignMixin):
     def check_sign(self, params):
         return params['sign'] == self.calc_sign(params) if params['sign'] else False
 
-
     def on_login_callback(self, succeed, msg):
         """登录请求回调"""
         data = {'status': 200, 'data': succeed} if succeed else {'status': 403, 'data': {'msg': msg}}
-        self.write(data)
+        self.write(str(data))
         self.finish()
-
 
 def start():
     try:

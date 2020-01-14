@@ -10,7 +10,8 @@ import threading
 from functools import partial
 from queue import Queue, Empty
 from DBUtils.PooledDB import PooledDB
-from functools import wraps
+from functools import wraps, partial
+from tornado.ioloop import IOLoop
 
 # 测算时间装饰器
 def run_time(f):
@@ -57,8 +58,8 @@ class AsyncMixin(object):
         super(AsyncMixin, self).__init__()
         self._thread_klass = thread_klass
         self._thread_klass_args = thread_klass_args
-        self._ioloop =None  # TODO 暂且搁置
-        self._queue = Queue()
+        self._ioloop = ioloop or IOLoop.current()
+        self._queue = Queue(maxsize=15)
         self._queue_timeout = queue_timeout
         self._threads = []
         self._running = True
@@ -90,7 +91,8 @@ class WorkerThread(threading.Thread):
         queue_timeout = self._pool._queue_timeout
         while self._pool._running:
             try:
-                (func, callback) = queue.get()
+                (func, callback) = queue.get(True, queue_timeout)
+                queue.task_done() # 剪掉任务
                 handler = self.get_handler()
                 print(func.func.__name__)
                 result = None
@@ -105,11 +107,13 @@ class WorkerThread(threading.Thread):
                     raise ValueError("%s not found" % func.func.__name__)
                 if callback:
                     # TODO 回调后续继承到tornado中
-                    callback(result, ex)
+                    # callback(result, ex)
+                    self._pool._ioloop.add_callback(partial(callback, result, ex))
             except Empty:
                 pass
         if hasattr(self, 'close'):
             """释放连接池中coon和cursor"""
+            print("释放资源")
             self.close()
 
 def async_thread(func):

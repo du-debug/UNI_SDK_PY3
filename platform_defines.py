@@ -3,7 +3,7 @@
 """
 from tornado.util import import_object
 
-ePlatform_test = 0  # 测试渠道
+ePlatform_test = 428  # 测试渠道
 
 __name_to_id__ = dict(
     test = ePlatform_test,

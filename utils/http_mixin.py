@@ -25,15 +25,13 @@ class HttpMixin(object):
         callback(user_data, resp)
 
     def request_get(self, url, params, callback, user_data=None):
-        # self.async_request_get(url, params, callback, user_data)
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.async_request_get(url, params, callback, user_data))
-        loop.close()
+        asyncio.run_coroutine_threadsafe(self.async_request_get(url, params, callback, user_data), loop)
 
 
     def request_post(self, url,body,callback,user_data=None):
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.async_request_post(url,body,callback,user_data))
+        asyncio.run_coroutine_threadsafe(self.async_request_post(url,body,callback,user_data), loop)
         loop.close()
 
 

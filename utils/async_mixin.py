@@ -68,7 +68,6 @@ class AsyncMixin(object):
             thread_klass_args['name'] = name
             t = thread_klass(**thread_klass_args)  # 实例化多线程的类和数据库链接初始化
             t.start()
-            # print("{} stat success".format(name))
             self._threads.append(t) # TODO 暂且搁置
 
     def add_task(self, func, callback=None):
@@ -80,6 +79,7 @@ class AsyncMixin(object):
         pass
 
 class WorkerThread(threading.Thread):
+
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self)
         self_name = kwargs.get('name', None)
@@ -106,8 +106,7 @@ class WorkerThread(threading.Thread):
                 else:
                     raise ValueError("%s not found" % func.func.__name__)
                 if callback:
-                    # TODO 回调后续继承到tornado中
-                    # callback(result, ex)
+                    # 要为当前io
                     self._pool._ioloop.add_callback(partial(callback, result, ex))
             except Empty:
                 pass

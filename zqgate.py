@@ -6,14 +6,13 @@ from tornado.web import Application, RequestHandler
 from utils.async_mysql import AsyncMysql
 from utils.handler_mixin import HandlerMixin
 from common.sign_mixin import SignMixin
-from tornado.gen import coroutine
-from tornado import gen
 
 
 import settings
 import platform_defines
 import tornado.options
 import tornado.ioloop
+import tornado.gen
 
 
 

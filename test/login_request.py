@@ -18,10 +18,10 @@ class LoginRequest(HttpMixin, LogMixix):
 
     def process(self, request_handler, params):
         """由此处理具体业务逻辑"""
-        self.log_info("日志正常运行1")
-        self.log_debug("日志正常运行2")
-        self.log_error("日志正常运行3")
-        self.log_warning("日志正常运行4")
+        self.log_info("日志正常运行1" * 100)
+        self.log_debug("日志正常运行2" * 100)
+        self.log_error("日志正常运行3" * 100)
+        self.log_warning("日志正常运行4" * 100)
         self.verify_session(params, request_handler.on_login_callback)
         return True
 

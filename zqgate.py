@@ -73,7 +73,7 @@ def main():
     define("address", default='127.0.0.1', help="run on the default address 127.0.0.1")
     define("daemon", default=settings.daemon, help="run as daemon", type=bool)
     define("webgate", default=settings.webgate, help="run on web gate mode", type=bool)
-    define("log_to_file", default=False, help="log to file", type=bool)
+    define("log_to_file", default=True, help="log to file", type=bool)
     define("game_host", default=settings.game_servers['development']['host'], help="bind address", type=str)
     define("game_port", default=settings.game_servers['development']['port'], help="run on the given port", type=int)
     define("mode", default="local_test", help="default run in development mode", type=str)

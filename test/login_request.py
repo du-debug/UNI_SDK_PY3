@@ -22,7 +22,6 @@ class LoginRequest(HttpMixin, LogMixin):
         self.log_debug("日志正常运行2" * 100)
         self.log_error("日志正常运行3" * 100)
         self.log_warning("日志正常运行4" * 100)
-        print(z)
         self.verify_session(params, request_handler.on_login_callback)
         return True
 

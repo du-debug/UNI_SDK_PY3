@@ -5,8 +5,10 @@ import platform_defines
 import json
 import constant
 
+from utils.log_mixin import LogMixin
 
-class HandlerMixin(object):
+
+class HandlerMixin(LogMixin):
 
 
     def find_app(self, app_id, on_app_found):
@@ -17,6 +19,7 @@ class HandlerMixin(object):
 
         def callback(result, ex):
             if not result or ex:
+                self.log_error("find_app error, sql:%s", sql_str, exc_info=ex)
                 self.on_login_callback_error(app_result=None, app_id=app_id)
             app_params = result[0]
             on_app_found(app_params)
@@ -38,6 +41,7 @@ class HandlerMixin(object):
         def callback(result, ex):
             handler = None
             if not result or ex:
+                self.log_error("find_handler error, sql:%s", sql_str, exc_info=ex)
                 self.on_login_callback_error(platform_result=None, platform_id=platform_id)
             # 实名认证
             elif handler_name == 'check_real_name':
@@ -46,11 +50,13 @@ class HandlerMixin(object):
                     data = {
                         'real_name_on': 0
                     }
+                    self.log_info("check_real_name off")
                 elif result[0]['check_real_name'] == '1':
                     # 返回数据开启实名认证
                     data = {
                         'real_name_on': 1
                     }
+                    self.log_info("check_real_name on")
                 self.write(json.dumps(data))
                 self.finish()
             else:
@@ -76,6 +82,7 @@ class HandlerMixin(object):
 
         def on_app_found(app_params):
             self._app = app_params
+            self.log_info("handler_name:%s" % handler_name)
             self.find_handler(app_params, platform_id, handler_name, self.on_find_handler)
 
         self.find_app(app_id, on_app_found)
@@ -91,24 +98,32 @@ class HandlerMixin(object):
 
     def on_find_handler(self, handler):
         self.handler, handler_by_handler = handler, False
+        self.log_info("handler:{0}, handle_by_handler:{1}".format(handler, handler_by_handler))
         if self.handler:
+            self.log_info("self.handler:%s" % self.handler)
             if hasattr(self.handler, 'parse_params'):
                 params = self.handler.parse_params(self)
+                self.log_info("params:{}".format(params))
             elif hasattr(self.handler, 'collect_params'):
                 params = self.handler.collect_params(self)
+                self.log_info("collect_params:{}".format(params))
             elif hasattr(self, 'get_params_keys'):
                 params = self.collect_params(self.get_params_keys())
+                self.log_info("on_find_handler_params:{}".format(params))
             else:
                 params = self.collect_params(self.handler.get_params_keys())
-
+                self.log_info("params:{}".format(params))
             #校验参数
             checked = self.check_sign(params) if hasattr(self, 'check_sign') else self.handler.check_sign(params)
+            self.log_info("checked:{}".format(checked))
             if checked and self.handler.process(self, params):
                 """由此进入具体模块处理业务逻辑"""
                 handler_by_handler = True
+                self.log_info("checked! True!!!")
 
         if not handler_by_handler:
             self.set_status(constant.HTTP_401, reason='sign not match')
+            self.log_error("sign not match")
             if not self._finished:
                 self.finish()
 
@@ -117,11 +132,13 @@ class HandlerMixin(object):
         """统一处理查询app,platform错误"""
         if not kwargs.get('app_or_platform', True):
             data = {'status': 403, 'data': {'msg': "app_or_platform not exist"}}
+            self.log_info("app_or_platform not exist. args:{},kwargs:{}".format(args, kwargs))
             self.write(data)
-            self
         elif not kwargs.get('app_result', True) and kwargs['app_id']:
             data = {'status': 403, 'data': {'msg': "app_id:{},find error".format(kwargs['app_id'])}}
             self.write(data)
+            self.log_info("app_id:{},find error. args:{},kwargs:{}".format(kwargs['app_id'], args, kwargs))
         elif not kwargs.get('platform_result', True) and kwargs['platform_id']:
             data = {'status': 403, 'data': {'msg': "platform_id:{},find error".format(kwargs['platform_id'])}}
+            self.log_info("platform_id:{},find error. args:{},kwargs:{}".format(kwargs['platform_id'], args, kwargs))
             self.write(data)

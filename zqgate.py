@@ -18,7 +18,7 @@ import tornado.gen
 
 
 
-class Web(RequestHandler, HandlerMixin):
+class Web(RequestHandler, HandlerMixin, LogMixin):
     """处理请求公共"""
 
     def initialize(self, mysql):
@@ -30,11 +30,13 @@ class Web(RequestHandler, HandlerMixin):
     @tornado.gen.coroutine
     def get(self, app_id, platform, action):
         self._auto_finish = False  # TODO 不让自动提交finish
+        self.log_info("POST uri:%s, body: %s" % (self.request.uri, self.request.body))
         self.handle_request_with_process(int(app_id), platform, action)
 
     @tornado.gen.coroutine
     def post(self, app_id, platform, action):
         self._auto_finish = False  # TODO 不让自动提交finish
+        self.log_info("GET uri: %s, argument: (%s)" % (self.request.uri, self.request.arguments))
         self.handle_request_with_process(int(app_id), platform, action)
 
 
@@ -48,6 +50,7 @@ class Login(Web, SignMixin):
         """登录请求回调"""
         data = {'status': 200, 'data': succeed} if succeed else {'status': 403, 'data': {'msg': msg}}
         self.write(str(data))
+        self.log_debug(str(data))
         self.finish()
 
 def start():
@@ -82,7 +85,6 @@ def main():
     # TODO 有戏服务器暂且搁置
     # game_server = settings.game_servers[options.mode]
     # assert game_server
-
     if options.daemon:
         pass
     # 初始化记录请求日志

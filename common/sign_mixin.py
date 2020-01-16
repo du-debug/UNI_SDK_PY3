@@ -10,9 +10,8 @@ class SignMixin(object):
         keys = sorted(filter(lambda x: x != "sign", params.keys()))
         sign_str = '&'.join(
             ["%s=%s" % (key, to_utf8(params.get(key, ''))) for key in keys if params.get(key, "") != ""])
-        print("sign_str:{}".format(sign_str))
         sign = hashlib.md5((sign_str + self._app['key']).encode('utf-8')).hexdigest()
-        print("sign:{}".format(sign))
+        self.log_info("sign_str:%s, sign:%s" % (sign_str + self._app['key'], sign))
         return sign
 
 

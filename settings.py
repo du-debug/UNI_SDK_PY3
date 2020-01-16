@@ -45,6 +45,13 @@ database_configs = dict(
             host= '127.0.0.1',
             cursorclass = pymysql.cursors.DictCursor  # sql查询结果以字典形式输出
         ),
+    aio_local_test = dict(
+                db= 'uni_talkingsdk_production',
+                user= 'root',
+                password = 'mysql',
+                host= '127.0.0.1',
+                port=3306
+            ),
 
 )
 

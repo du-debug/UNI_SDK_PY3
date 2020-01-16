@@ -2,9 +2,9 @@
 登录请求处理
 """
 from utils.http_mixin import HttpMixin
-from utils.log_mixin import LogMixix
+from utils.log_mixin import LogMixin
 
-class LoginRequest(HttpMixin, LogMixix):
+class LoginRequest(HttpMixin, LogMixin):
 
 
     keys = ('account', 'session', 'ext', 'sign')
@@ -22,11 +22,11 @@ class LoginRequest(HttpMixin, LogMixix):
         self.log_debug("日志正常运行2" * 100)
         self.log_error("日志正常运行3" * 100)
         self.log_warning("日志正常运行4" * 100)
+        print(z)
         self.verify_session(params, request_handler.on_login_callback)
         return True
 
     def verify_session(self, params, callback):
-
         def on_request(user_data, resp):
             print("发送请求：{}".format(user_data))
         self.request_get(url="http://www.baidu.com", params={}, callback=on_request, user_data="duweihua")

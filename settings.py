@@ -15,7 +15,7 @@ log_rotating_when='midnight' # 日志时间切割点
 “midnight”: Roll over at midnight
 """
 log_backup_count = 100 # 保留日志的个数
-log_max_bytes = 1024 # 保留日志的大小
+log_max_bytes = 1024 * 1024 * 10 # 保留日志的大小
 log_base_dir= os.path.join(ROOT,'logs')
 game_servers = dict(
     production=dict(host='10.68.237.133', port=8885),

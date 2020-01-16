@@ -6,6 +6,7 @@ from tornado.web import Application, RequestHandler
 from utils.async_mysql import AsyncMysql
 from utils.handler_mixin import HandlerMixin
 from common.sign_mixin import SignMixin
+from utils.log_mixin import LogMixin, CommonLog
 
 
 import settings
@@ -20,10 +21,8 @@ import tornado.gen
 class Web(RequestHandler, HandlerMixin):
     """处理请求公共"""
 
-
     def initialize(self, mysql):
         self._mysql = mysql
-
 
     def prepare(self):
         pass
@@ -86,7 +85,8 @@ def main():
 
     if options.daemon:
         pass
-
+    # 初始化记录请求日志
+    CommonLog()
     # start
     start()
 

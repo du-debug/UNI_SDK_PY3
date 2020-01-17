@@ -31,6 +31,7 @@ class Web(RequestHandler, HandlerMixin, LogMixin):
     def get(self, app_id, platform, action):
         self._auto_finish = False  # TODO 不让自动提交finish
         self.log_info("POST uri:%s, body: %s" % (self.request.uri, self.request.body))
+
         self.handle_request_with_process(int(app_id), platform, action)
 
     @tornado.gen.coroutine
@@ -78,7 +79,7 @@ def main():
     define("log_to_file", default=True, help="log to file", type=bool)
     define("game_host", default=settings.game_servers['development']['host'], help="bind address", type=str)
     define("game_port", default=settings.game_servers['development']['port'], help="run on the given port", type=int)
-    define("mode", default="local_test", help="default run in development mode", type=str)
+    define("mode", default="aio_local_test", help="default run in development mode", type=str)
 
     # 从命令行分析全局变量
     tornado.options.parse_command_line(final=False)  # final=False不执行分析回调

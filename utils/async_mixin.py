@@ -93,7 +93,6 @@ class WorkerThread(threading.Thread):
                 (func, callback) = queue.get(True, queue_timeout)
                 queue.task_done() # 剪掉任务
                 handler = self.get_handler()
-                print(func.func.__name__)
                 result = None
                 ex = None
                 if hasattr(handler, func.func.__name__):

@@ -44,7 +44,6 @@ class DbutilsMySql(object):
         self.connect()
         try:
             self.cursor.execute(sql_str)
-            print(sql_str)
             result = self.cursor.fetchall()
         except Exception as e:
             pass
@@ -61,7 +60,6 @@ class PymsqlTest(object):
         pymysql.connect(**args[0])
 
     def query_hash(self, sql_str):
-
         return [{'a':1}]
 
 

@@ -10,11 +10,12 @@ from utils.async_mixin import AsyncMixin
 from utils.async_mixin import WorkerThread
 from utils.msyql import DbutilsMySql, PymsqlTest
 from utils.async_mixin import async_class
+from utils.aio_pymsql_test import AioMysqlPoll
 
 class MysqlThread(WorkerThread):
 
     def __init__(self, *args, **kwargs):
-        self._mysql = DbutilsMySql(kwargs['db_config'])
+        self._mysql = AioMysqlPoll(kwargs['db_config'])
         super(MysqlThread, self).__init__(*args, **kwargs)
         self.daemon = True
 

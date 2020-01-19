@@ -340,17 +340,17 @@ class LogMixin(object):
                 log_name = '%s_%s' % (log_base_name,n)
                 logger = self.create_logger(log_name,l)
                 if log_to_file:
-                    # print('1')
+
                     path = self.get_log_file(n, log_dir)
-                    # time_handler = self.create_TimedRotatingFileHandler(
-                    #     l, path, settings.log_rotating_when, settings.log_backup_count
-                    # )
+                    time_handler = self.create_TimedRotatingFileHandler(
+                        l, path, settings.log_rotating_when, settings.log_backup_count
+                    )
                     # size_handler = self.create_RotatingFileHandler(path, l, settings.log_max_bytes, settings.log_backup_count)
                     # logger.addHandler(time_handler)
                     # logger.addHandler(size_handler)
-                    handler = self.create_time_size_handler(l, path, settings.log_rotating_when, settings.log_backup_count,
-                                                            settings.log_max_bytes)
-                    logger.addHandler(handler)
+                    # handler = self.create_time_size_handler(l, path, settings.log_rotating_when, settings.log_backup_count,
+                    #                                         settings.log_max_bytes)
+                    logger.addHandler(time_handler)
                 else:
                     logger = self.create_logger(log_name, l)
                     chanel = logging.StreamHandler()  # 默认的handler

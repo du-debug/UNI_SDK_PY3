@@ -7,11 +7,13 @@ import time
 import sys
 import pymysql
 import threading
+
 from functools import partial
 from queue import Queue, Empty
 from DBUtils.PooledDB import PooledDB
 from functools import wraps, partial
 from tornado.ioloop import IOLoop
+from utils.log_mixin import LogMixin
 
 # 测算时间装饰器
 def run_time(f):
@@ -77,12 +79,13 @@ class AsyncMixin(object):
     def stop(self):
         self._running = False
 
-class WorkerThread(threading.Thread):
+class WorkerThread(threading.Thread, LogMixin):
 
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self)
-        self_name = kwargs.get('name', None)
+        self._name = kwargs.get('name', None)
         self._pool = kwargs.get('pool', None)
+        self.log_info("WorkerThread created: %s" % self._name)
 
     def run(self):
         """执行队列里面的任务"""

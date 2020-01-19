@@ -1,12 +1,14 @@
 """
 异步数据库链接aio_mysql, 文档地址：https://aiomysql.readthedocs.io/en/latest/cursors.html
 根据需求可选择不同的游标，直接引用类的引用即可
+aio_mysql也支持sql查询生成器
 """
 import datetime
 import settings
 import asyncio
 import aiomysql
 
+from aiomysql.sa import create_engine
 from utils.log_mixin import LogMixin
 
 class DictCursor(aiomysql.DictCursor):
@@ -30,15 +32,21 @@ class AioMysqlPoll(LogMixin):
 
     def __init__(self, db_config, **kwargs):
         self._pool = None
+        self._engine = None
         self._loop = asyncio.get_event_loop()
         self.db_config = db_config
-        print(db_config, kwargs)
 
     async def sql_execute(self, sq_str, **kwargs):
+        """aiomysql数据库连接池"""
         if not self._pool:
-            self.db_config['loop'] = self._loop
-            self._pool = await aiomysql.create_pool(**self.db_config, maxsize=15)
+            # self.db_config['loop'] = self._loop
+            self._pool = await aiomysql.create_pool(**self.db_config, maxsize=15, connect_timeout=15)
         async with self._pool.acquire() as coon:
+            try:
+                stat = await coon.ping()
+            except coon.OperationalError:
+                self.log_error("mysql client connect error, reconnect right now")
+                self._pool = await aiomysql.create_pool(**self.db_config, maxsize=15, connect_timeout=15)
             async with coon.cursor(DictCursor) as cursor:
                 await cursor.execute(sq_str)
                 res = await cursor.fetchall()
@@ -46,18 +54,12 @@ class AioMysqlPoll(LogMixin):
         # self._pool.close()
         # await self._pool.wait_closed()
 
-    def query(self, sql_str):
-        result = self._loop.run_until_complete(self.sql_execute(sql_str))
-        print(result[0])
-
-
     def query_hash(self, sql_str):
         result = asyncio.run_coroutine_threadsafe(self.sql_execute(sql_str), self._loop)
         return result.result()
 
     def close(self):
         self._pool.close()
-
 
 if __name__ == "__main__":
     test = AioMysqlPoll(settings.database_configs['aio_local_test'])

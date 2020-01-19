@@ -70,7 +70,7 @@ class AsyncMixin(object):
             thread_klass_args['name'] = name
             t = thread_klass(**thread_klass_args)  # 实例化多线程的类和数据库链接初始化
             t.start()
-            self._threads.append(t) # TODO 暂且搁置
+            self._threads.append(t)
 
     def add_task(self, func, callback=None):
         """往队列里面添加任务"""
@@ -78,6 +78,7 @@ class AsyncMixin(object):
 
     def stop(self):
         self._running = False
+        [t.join() for t in self._threads] # 等待子线程任务结束　主线程关闭
 
 class WorkerThread(threading.Thread, LogMixin):
 
@@ -113,7 +114,7 @@ class WorkerThread(threading.Thread, LogMixin):
                 pass
         if hasattr(self, 'close'):
             """释放连接池中coon和cursor"""
-            print("释放资源")
+            self.log_info("{} Do close".format(self._name))
             self.close()
 
 def async_thread(func):

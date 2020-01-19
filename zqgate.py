@@ -29,10 +29,18 @@ class Web(RequestHandler, HandlerMixin, LogMixin):
 
     @tornado.gen.coroutine
     def get(self, app_id, platform, action):
-        self._auto_finish = False  # TODO 不让自动提交finish
-        self.log_info("POST uri:%s, body: %s" % (self.request.uri, self.request.body))
+        # self._auto_finish = False  # TODO 不让自动提交finish
+        # self.log_info("POST uri:%s, body: %s" % (self.request.uri, self.request.body))
+        #
+        # self.handle_request_with_process(int(app_id), platform, action)
+        print('*'*500)
+        def cb(*args, **kwargs):
+            print('*'*30)
 
-        self.handle_request_with_process(int(app_id), platform, action)
+        sql_str = "select * from apps"
+        self._mysql.query_hash(sql_str, callback=cb)
+        self.write("请求成功")
+        self.finish()
 
     @tornado.gen.coroutine
     def post(self, app_id, platform, action):
@@ -63,7 +71,8 @@ def start():
         ])
         application.listen(port=options.port, address=options.address)
         tornado.ioloop.IOLoop.current().start()
-    except Exception as e:
+    # 直接debug直接捕获此异常
+    except KeyboardInterrupt as e:
         mysql.stop()
         tornado.ioloop.IOLoop.current().stop() # 停止当前io循环
         print(e)
@@ -85,7 +94,6 @@ def main():
     tornado.options.parse_command_line(final=False)  # final=False不执行分析回调
     # TODO 有戏服务器暂且搁置
     # game_server = settings.game_servers[options.mode]
-    # assert game_server
     if options.daemon:
         pass
     # 初始化记录请求日志
@@ -106,3 +114,4 @@ if __name__ == "__main__":
     #
     # for i in range(5):
     #     test.query_hash(sql_str, callback=callback)
+

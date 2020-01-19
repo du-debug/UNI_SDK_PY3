@@ -59,7 +59,14 @@ class AioMysqlPoll(LogMixin):
         return result.result()
 
     def close(self):
-        self._pool.close()
+        if self._pool:
+            # with上下文已经close,　再次不用处理
+            print(dir(self._pool))
+            # self._pool.close()
+            self._pool.terminate()
+            pass
+        else:
+            print(1)
 
 if __name__ == "__main__":
     test = AioMysqlPoll(settings.database_configs['aio_local_test'])

@@ -55,18 +55,15 @@ class AioMysqlPoll(LogMixin):
         # await self._pool.wait_closed()
 
     def query_hash(self, sql_str):
-        result = asyncio.run_coroutine_threadsafe(self.sql_execute(sql_str), self._loop)
-        return result.result()
+        if not self._pool:
+            result = asyncio.run_coroutine_threadsafe(self.sql_execute(sql_str), self._loop)
+            # result = self._loop.run_until_complete(self.sql_execute(sql_str))
+            # return result
+            return result.result()
 
     def close(self):
-        if self._pool:
-            # with上下文已经close,　再次不用处理
-            print(dir(self._pool))
-            # self._pool.close()
-            self._pool.terminate()
-            pass
-        else:
-            print(1)
+        # TODO 暂且搁置，aiomysql．RuntimeError: Event loop is closed
+        pass
 
 if __name__ == "__main__":
     test = AioMysqlPoll(settings.database_configs['aio_local_test'])

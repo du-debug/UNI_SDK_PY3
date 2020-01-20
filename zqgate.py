@@ -72,10 +72,10 @@ def start():
         application.listen(port=options.port, address=options.address)
         tornado.ioloop.IOLoop.current().start()
     # 直接debug直接捕获此异常
-    except KeyboardInterrupt as e:
+    except (KeyboardInterrupt):
         mysql.stop()
         tornado.ioloop.IOLoop.current().stop() # 停止当前io循环
-        print(e)
+
 
 
 

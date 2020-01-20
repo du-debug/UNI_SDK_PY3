@@ -62,7 +62,7 @@ class AioMysqlPoll(LogMixin):
             return result.result()
 
     def close(self):
-        # TODO 暂且搁置，aiomysql．RuntimeError: Event loop is closed
+        # TODO 暂且搁置，aiomysql．RuntimeError: Event loop is closed　
         pass
 
 if __name__ == "__main__":
